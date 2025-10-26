@@ -1,0 +1,34 @@
+// File: src/styles.css
+/* 基础与修复 */
+* , *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body { margin: 0; background: #f7f8fa; color: #0f172a; font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, sans-serif; }
+
+/* 卡片与布局 */
+.container { max-width: 720px; margin: 0 auto; padding: 16px 16px 80px; }
+.header { text-align: center; margin-bottom: 12px; }
+.card { border: 1px solid #e5e7eb; padding: 12px; border-radius: 12px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.04); overflow: hidden; }
+.section { margin-top: 16px; }
+.h2 { font-size: 20px; margin: 8px 0 12px; }
+.list { list-style: none; padding: 0; margin-top: 12px; }
+.item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 8px; background: #fff; }
+
+/* 表单控件：使用 field 容器避免原生日期控件溢出 */
+.field { position: relative; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; background: #fff; margin-bottom: 8px; }
+.ui-input { display: block; width: 100%; max-width: 100%; padding: 10px 12px; border: 0; outline: none; background: transparent; font: inherit; }
+.ui-input:focus { box-shadow: inset 0 0 0 2px rgba(14,165,233,.18); }
+/* 为右侧日期图标留空间（Chrome/Safari） */
+input[type="date"].ui-input, input[type="datetime-local"].ui-input { padding-right: 40px; }
+/* 对齐日历按钮，防止撑出容器边界 */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator { position: absolute; right: 10px; top: 0; bottom: 0; margin: auto; height: 20px; width: 20px; cursor: pointer; }
+
+/* 按钮 */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; border: 0; cursor: pointer; }
+.btn-primary { background: #0ea5e9; color: #fff; }
+.btn-danger { background: #ef4444; color: #fff; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* 细节 */
+.meta { color: #9aa4b2; font-size: 12px; text-align: center; padding: 24px; }
+.subtle { color: #666; }
