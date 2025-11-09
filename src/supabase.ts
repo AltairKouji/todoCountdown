@@ -43,18 +43,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 // =============================================
 
 /**
- * 匿名登录（如果未登录则自动创建匿名用户）
- */
-export async function signInAnonymously() {
-  const { data, error } = await supabase.auth.signInAnonymously();
-  if (error) {
-    console.error('Anonymous sign-in error:', error);
-    throw error;
-  }
-  return data;
-}
-
-/**
  * 获取当前用户
  */
 export async function getCurrentUser() {
@@ -62,24 +50,11 @@ export async function getCurrentUser() {
   return user;
 }
 
-/**
- * 确保用户已登录（如未登录则自动匿名登录）
- */
-export async function ensureAuthenticated() {
-  const user = await getCurrentUser();
-  if (!user) {
-    return await signInAnonymously();
-  }
-  return { user };
-}
-
 // =============================================
 // Todos 数据操作
 // =============================================
 
 export async function getTodos() {
-  await ensureAuthenticated();
-
   const { data, error } = await supabase
     .from('todos')
     .select('*')
@@ -94,8 +69,6 @@ export async function addTodo(todo: {
   notes?: string;
   dueAt?: string;
 }) {
-  await ensureAuthenticated();
-
   const { data: { user } } = await supabase.auth.getUser();
 
   const { data, error } = await supabase
@@ -120,8 +93,6 @@ export async function updateTodo(id: string, updates: {
   isDone?: boolean;
   dueAt?: string;
 }) {
-  await ensureAuthenticated();
-
   const payload: any = {};
   if (updates.title !== undefined) payload.title = updates.title;
   if (updates.notes !== undefined) payload.notes = updates.notes;
@@ -140,8 +111,6 @@ export async function updateTodo(id: string, updates: {
 }
 
 export async function deleteTodo(id: string) {
-  await ensureAuthenticated();
-
   const { error } = await supabase
     .from('todos')
     .delete()
@@ -155,8 +124,6 @@ export async function deleteTodo(id: string) {
 // =============================================
 
 export async function getCountdowns() {
-  await ensureAuthenticated();
-
   const { data, error } = await supabase
     .from('countdowns')
     .select('*')
@@ -171,8 +138,6 @@ export async function addCountdown(countdown: {
   targetDate: string;
   color?: string;
 }) {
-  await ensureAuthenticated();
-
   const { data: { user } } = await supabase.auth.getUser();
 
   const { data, error } = await supabase
@@ -195,8 +160,6 @@ export async function updateCountdown(id: string, updates: {
   targetDate?: string;
   color?: string;
 }) {
-  await ensureAuthenticated();
-
   const payload: any = {};
   if (updates.title !== undefined) payload.title = updates.title;
   if (updates.targetDate !== undefined) payload.target_date = updates.targetDate;
@@ -214,8 +177,6 @@ export async function updateCountdown(id: string, updates: {
 }
 
 export async function deleteCountdown(id: string) {
-  await ensureAuthenticated();
-
   const { error } = await supabase
     .from('countdowns')
     .delete()
