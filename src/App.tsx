@@ -57,27 +57,29 @@ export default function App() {
   // 已登录：显示主应用
   return (
     <main className="container">
-      <header className="header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <div style={{ fontSize: 28 }}>🌤️ 清爽待办 & 倒数日</div>
-            <div className="subtle" style={{ fontSize: 12 }}>云端同步 · 跨设备访问</div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="btn"
-            style={{ fontSize: 14 }}
-          >
-            退出登录
-          </button>
-        </div>
+      <header style={{ position: 'relative', textAlign: 'center', marginBottom: 20, paddingTop: 8 }}>
+        <button
+          onClick={handleLogout}
+          className="btn"
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            fontSize: 13,
+            padding: '6px 12px'
+          }}
+        >
+          退出
+        </button>
+        <div style={{ fontSize: 28, marginBottom: 4 }}>🌤️ 清爽待办 & 倒数日</div>
+        <div className="subtle" style={{ fontSize: 12 }}>云端同步 · 跨设备访问</div>
       </header>
 
       <TodoSection />
       <CountdownSection />
 
       <footer className="meta">
-        已登录: {user.email?.split('@')[0]} · React · Vite · Supabase
+        已登录: {user.user_metadata?.display_name || user.email?.split('@')[0]} · React · Vite · Supabase
       </footer>
     </main>
   );

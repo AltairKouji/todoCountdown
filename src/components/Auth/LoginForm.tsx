@@ -49,60 +49,83 @@ export default function LoginForm({ onLoginSuccess }: Props) {
         <p className="subtle" style={{ fontSize: 14 }}>请登录以继续</p>
       </div>
 
-      <form onSubmit={handleLogin} className="card">
-        <div className="field">
-          <label style={{ display: "block", marginBottom: 6, fontSize: 14, fontWeight: 500 }}>
+      <form onSubmit={handleLogin} style={{ marginTop: 24 }}>
+        <div style={{ marginBottom: 20 }}>
+          <label style={{
+            display: "block",
+            marginBottom: 8,
+            fontSize: 14,
+            fontWeight: 500,
+            color: "#374151"
+          }}>
             用户名
           </label>
-          <input
-            className="ui-input"
-            type="text"
-            placeholder="请输入用户名"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
-            autoComplete="username"
-            required
-          />
+          <div className="field" style={{ marginBottom: 0 }}>
+            <input
+              className="ui-input"
+              type="text"
+              placeholder="请输入用户名"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              autoComplete="username"
+              required
+            />
+          </div>
         </div>
 
-        <div className="field">
-          <label style={{ display: "block", marginBottom: 6, fontSize: 14, fontWeight: 500 }}>
+        <div style={{ marginBottom: 20 }}>
+          <label style={{
+            display: "block",
+            marginBottom: 8,
+            fontSize: 14,
+            fontWeight: 500,
+            color: "#374151"
+          }}>
             密码
           </label>
-          <input
-            className="ui-input"
-            type="password"
-            placeholder="请输入密码"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
-            autoComplete="current-password"
-            required
-          />
+          <div className="field" style={{ marginBottom: 0 }}>
+            <input
+              className="ui-input"
+              type="password"
+              placeholder="请输入密码"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              autoComplete="current-password"
+              required
+            />
+          </div>
         </div>
 
         {error && (
           <div style={{
             padding: 12,
-            marginBottom: 16,
+            marginBottom: 20,
             backgroundColor: "#fee",
             color: "#c33",
-            borderRadius: 6,
+            borderRadius: 8,
             fontSize: 14,
           }}>
             {error}
           </div>
         )}
 
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={loading}
-          style={{ width: "100%" }}
-        >
-          {loading ? "登录中..." : "登录"}
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{
+              paddingLeft: 32,
+              paddingRight: 32,
+              fontSize: 15,
+              fontWeight: 500
+            }}
+          >
+            {loading ? "登录中..." : "登录"}
+          </button>
+        </div>
       </form>
 
       <div style={{
