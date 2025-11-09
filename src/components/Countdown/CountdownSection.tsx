@@ -1,21 +1,55 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db, nowIso, uid } from "../../db";
 import type { Countdown } from "../../types";
 import CountdownItem from "./CountdownItem";
+import { getCountdowns, addCountdown, deleteCountdown, subscribeCountdowns } from "../../supabase";
 
 export default function CountdownSection() {
-  const items = useLiveQuery(() => db.countdowns.toArray(), []);
+  const [items, setItems] = useState<Countdown[]>([]);
+  const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [color, setColor] = useState("#0ea5e9");
+
+  // 加载 countdowns
+  const loadCountdowns = async () => {
+    try {
+      const data = await getCountdowns();
+      // 转换数据库字段名为应用字段名
+      const mapped: Countdown[] = data.map(row => ({
+        id: row.id,
+        title: row.title,
+        targetDate: row.target_date,
+        color: row.color || undefined,
+        createdAt: row.created_at,
+      }));
+      setItems(mapped);
+    } catch (error) {
+      console.error('加载 countdowns 失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 初始加载
+  useEffect(() => {
+    loadCountdowns();
+
+    // 订阅实时更新
+    const unsubscribe = subscribeCountdowns(() => {
+      loadCountdowns();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // 自动刷新：每小时刷新一次 + 午夜后立刻再刷新一次
   const [, setTick] = useState(0);
   useEffect(() => {
     const bump = () => setTick((x) => x + 1);
 
-    // 每小时刷新一次，保证跨小时时“还有X天”逐步接近变化点
+    // 每小时刷新一次，保证跨小时时"还有X天"逐步接近变化点
     const hourly = setInterval(bump, 60 * 60 * 1000);
 
     // 到下一个午夜 00:00:05 自动刷新（加 5 秒缓冲，避免时钟抖动）
@@ -48,20 +82,28 @@ export default function CountdownSection() {
   const add = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !date) return;
-    const data: Countdown = {
-      id: uid(),
-      title: title.trim(),
-      targetDate: new Date(date).toISOString(),
-      color,
-      createdAt: nowIso(),
-    };
-    await db.countdowns.add(data);
-    setTitle("");
-    setDate("");
+    try {
+      await addCountdown({
+        title: title.trim(),
+        targetDate: new Date(date).toISOString(),
+        color,
+      });
+      setTitle("");
+      setDate("");
+    } catch (error) {
+      console.error('添加 countdown 失败:', error);
+      alert('添加失败，请重试');
+    }
   };
 
   const remove = async (id: string) => {
-    if (confirm("确认删除这个倒数日？")) await db.countdowns.delete(id);
+    if (confirm("确认删除这个倒数日？")) {
+      try {
+        await deleteCountdown(id);
+      } catch (error) {
+        console.error('删除 countdown 失败:', error);
+      }
+    }
   };
 
   return (
