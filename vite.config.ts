@@ -10,8 +10,11 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       devOptions: { enabled: true },
+      workbox: {
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3MB
+      },
       manifest: {
         name: '清爽待办与倒数日',
         short_name: '待办倒数日',
