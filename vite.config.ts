@@ -3,7 +3,10 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/todoCountdown/',   // GitHub Pages 子路径
+  // 根据环境自动设置 base 路径
+  // Vercel: 根路径 '/'
+  // GitHub Pages: 子路径 '/todoCountdown/'
+  base: process.env.VERCEL ? '/' : '/todoCountdown/',
   plugins: [
     react(),
     VitePWA({
