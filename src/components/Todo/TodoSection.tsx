@@ -100,6 +100,8 @@ export default function TodoSection() {
     }
   };
 
+  const hasTodos = sorted.length > 0;
+
   return (
     <section className="section">
       <h2 className="h2">待办</h2>
@@ -116,9 +118,23 @@ export default function TodoSection() {
         <button type="submit" className="btn btn-primary">添加</button>
       </form>
 
-      <ul className="list">
-        {sorted.map((t) => (<TodoItem key={t.id} todo={t} onToggle={toggleDone} onDelete={remove} />))}
-      </ul>
+      {!hasTodos && !loading && (
+        <div style={{
+          textAlign: 'center',
+          padding: '40px 20px',
+          color: '#94a3b8',
+        }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>✨</div>
+          <div style={{ fontSize: 15, marginBottom: 4 }}>还没有待办事项</div>
+          <div style={{ fontSize: 13 }}>点击上方添加第一个吧</div>
+        </div>
+      )}
+
+      {hasTodos && (
+        <ul className="list">
+          {sorted.map((t) => (<TodoItem key={t.id} todo={t} onToggle={toggleDone} onDelete={remove} />))}
+        </ul>
+      )}
     </section>
   );
 }
