@@ -1,15 +1,51 @@
 // File: src/components/Todo/TodoSection.tsx
-import React, { useMemo, useState } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db, nowIso, uid } from "../../db";
+import React, { useMemo, useState, useEffect } from "react";
 import type { Todo } from "../../types";
 import TodoItem from "./TodoItem";
+import { getTodos, addTodo as addTodoToSupabase, updateTodo, deleteTodo, subscribeTodos } from "../../supabase";
 
 export default function TodoSection() {
-  const todos = useLiveQuery(() => db.todos.toArray(), []);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [dueAt, setDueAt] = useState<string>("");
+
+  // 加载 todos
+  const loadTodos = async () => {
+    try {
+      const data = await getTodos();
+      // 转换数据库字段名为应用字段名
+      const mapped: Todo[] = data.map(row => ({
+        id: row.id,
+        title: row.title,
+        notes: row.notes || undefined,
+        isDone: row.is_done,
+        dueAt: row.due_at || undefined,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }));
+      setTodos(mapped);
+    } catch (error) {
+      console.error('加载 todos 失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 初始加载
+  useEffect(() => {
+    loadTodos();
+
+    // 订阅实时更新
+    const unsubscribe = subscribeTodos(() => {
+      loadTodos();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const sorted = useMemo(() => {
     if (!todos) return [] as Todo[];
@@ -25,13 +61,38 @@ export default function TodoSection() {
   const addTodo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    const t: Todo = { id: uid(), title: title.trim(), notes: notes.trim() || undefined, isDone: false, dueAt: dueAt ? new Date(dueAt).toISOString() : undefined, createdAt: nowIso(), updatedAt: nowIso() };
-    await db.todos.add(t);
-    setTitle(""); setNotes(""); setDueAt("");
+    try {
+      await addTodoToSupabase({
+        title: title.trim(),
+        notes: notes.trim() || undefined,
+        dueAt: dueAt ? new Date(dueAt).toISOString() : undefined,
+      });
+      setTitle("");
+      setNotes("");
+      setDueAt("");
+    } catch (error) {
+      console.error('添加 todo 失败:', error);
+      alert('添加失败，请重试');
+    }
   };
 
-  const toggleDone = async (id: string, value: boolean) => { await db.todos.update(id, { isDone: value, updatedAt: nowIso() }); };
-  const remove = async (id: string) => { if (confirm("确认删除这条待办？")) await db.todos.delete(id); };
+  const toggleDone = async (id: string, value: boolean) => {
+    try {
+      await updateTodo(id, { isDone: value });
+    } catch (error) {
+      console.error('更新 todo 失败:', error);
+    }
+  };
+
+  const remove = async (id: string) => {
+    if (confirm("确认删除这条待办？")) {
+      try {
+        await deleteTodo(id);
+      } catch (error) {
+        console.error('删除 todo 失败:', error);
+      }
+    }
+  };
 
   return (
     <section className="section">
