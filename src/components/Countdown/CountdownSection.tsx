@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import type { Countdown } from "../../types";
 import CountdownItem from "./CountdownItem";
 import { getCountdowns, addCountdown, deleteCountdown, subscribeCountdowns } from "../../supabase";
+import { daysLeft } from "../../utils/date";
 
 export default function CountdownSection() {
   const [items, setItems] = useState<Countdown[]>([]);
@@ -79,6 +80,32 @@ export default function CountdownSection() {
     );
   }, [items]);
 
+  // 按紧急程度分组
+  const grouped = useMemo(() => {
+    const expired: Countdown[] = [];
+    const today: Countdown[] = [];
+    const urgent: Countdown[] = [];   // 1-3天
+    const soon: Countdown[] = [];     // 4-7天
+    const future: Countdown[] = [];   // 8天+
+
+    sorted.forEach((item) => {
+      const days = daysLeft(item.targetDate);
+      if (days < 0) {
+        expired.push(item);
+      } else if (days === 0) {
+        today.push(item);
+      } else if (days <= 3) {
+        urgent.push(item);
+      } else if (days <= 7) {
+        soon.push(item);
+      } else {
+        future.push(item);
+      }
+    });
+
+    return { expired, today, urgent, soon, future };
+  }, [sorted]);
+
   const add = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !date) return;
@@ -109,6 +136,31 @@ export default function CountdownSection() {
       }
     }
   };
+
+  // 渲染分组标题和列表的辅助函数
+  const renderGroup = (title: string, items: Countdown[], emoji: string) => {
+    if (items.length === 0) return null;
+    return (
+      <div key={title} style={{ marginBottom: 24 }}>
+        <div style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: '#64748b',
+          marginBottom: 8,
+          paddingLeft: 4,
+        }}>
+          {emoji} {title} ({items.length})
+        </div>
+        <ul className="list">
+          {items.map((c) => (
+            <CountdownItem key={c.id} item={c} onDelete={remove} />
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
+  const hasAnyCountdowns = sorted.length > 0;
 
   return (
     <section className="section">
@@ -144,11 +196,27 @@ export default function CountdownSection() {
         </button>
       </form>
 
-      <ul className="list">
-        {sorted.map((c) => (
-          <CountdownItem key={c.id} item={c} onDelete={remove} />
-        ))}
-      </ul>
+      {!hasAnyCountdowns && !loading && (
+        <div style={{
+          textAlign: 'center',
+          padding: '40px 20px',
+          color: '#94a3b8',
+        }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>📅</div>
+          <div style={{ fontSize: 15, marginBottom: 4 }}>还没有倒数日</div>
+          <div style={{ fontSize: 13 }}>添加一个重要的日子吧 🎯</div>
+        </div>
+      )}
+
+      {hasAnyCountdowns && (
+        <div>
+          {renderGroup('就是今天', grouped.today, '🎉')}
+          {renderGroup('紧急', grouped.urgent, '🔥')}
+          {renderGroup('即将到来', grouped.soon, '⏰')}
+          {renderGroup('未来', grouped.future, '📅')}
+          {renderGroup('已过期', grouped.expired, '⏸️')}
+        </div>
+      )}
     </section>
   );
 }
