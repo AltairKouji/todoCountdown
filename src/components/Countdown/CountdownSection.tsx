@@ -90,6 +90,8 @@ export default function CountdownSection() {
       });
       setTitle("");
       setDate("");
+      // 立即刷新列表
+      await loadCountdowns();
     } catch (error) {
       console.error('添加 countdown 失败:', error);
       alert('添加失败，请重试');
@@ -100,6 +102,8 @@ export default function CountdownSection() {
     if (confirm("确认删除这个倒数日？")) {
       try {
         await deleteCountdown(id);
+        // 立即刷新列表
+        await loadCountdowns();
       } catch (error) {
         console.error('删除 countdown 失败:', error);
       }

@@ -70,6 +70,8 @@ export default function TodoSection() {
       setTitle("");
       setNotes("");
       setDueAt("");
+      // 立即刷新列表
+      await loadTodos();
     } catch (error) {
       console.error('添加 todo 失败:', error);
       alert('添加失败，请重试');
@@ -79,6 +81,8 @@ export default function TodoSection() {
   const toggleDone = async (id: string, value: boolean) => {
     try {
       await updateTodo(id, { isDone: value });
+      // 立即刷新列表
+      await loadTodos();
     } catch (error) {
       console.error('更新 todo 失败:', error);
     }
@@ -88,6 +92,8 @@ export default function TodoSection() {
     if (confirm("确认删除这条待办？")) {
       try {
         await deleteTodo(id);
+        // 立即刷新列表
+        await loadTodos();
       } catch (error) {
         console.error('删除 todo 失败:', error);
       }
