@@ -5,10 +5,28 @@ import type { Database } from './supabase-types';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// 调试信息：检查环境变量是否正确加载
+console.log('🔍 Supabase 配置检查:');
+console.log('  URL:', supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : '❌ 未设置');
+console.log('  Key:', supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : '❌ 未设置');
+
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase environment variables. Please check .env.local file.'
-  );
+  const errorMsg = `
+❌ 缺少 Supabase 环境变量！
+
+请检查：
+1. Vercel Dashboard → Settings → Environment Variables
+2. 确认已添加：
+   - VITE_SUPABASE_URL
+   - VITE_SUPABASE_ANON_KEY
+3. 添加后需要重新部署（Deployments → Redeploy）
+
+当前状态：
+- VITE_SUPABASE_URL: ${supabaseUrl ? '✅ 已设置' : '❌ 未设置'}
+- VITE_SUPABASE_ANON_KEY: ${supabaseAnonKey ? '✅ 已设置' : '❌ 未设置'}
+  `;
+  console.error(errorMsg);
+  throw new Error(errorMsg);
 }
 
 // 创建 Supabase 客户端
