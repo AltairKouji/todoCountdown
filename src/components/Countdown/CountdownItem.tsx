@@ -1,7 +1,7 @@
 // File: src/components/Countdown/CountdownItem.tsx
 import React from "react";
 import type { Countdown } from "../../types";
-import { daysLeft } from "../../utils/date";
+import { daysLeft, getNextOccurrence } from "../../utils/date";
 
 type Props = { item: Countdown; onDelete: (id: string) => void; };
 const label = (iso: string) => { const d = daysLeft(iso); if (d > 0) return `还有 ${d} 天`; if (d === 0) return "就是今天！"; return `已经过去 ${Math.abs(d)} 天`; };
@@ -52,7 +52,13 @@ const getItemStyle = (targetDate: string) => {
 };
 
 export default function CountdownItem({ item, onDelete }: Props) {
-  const itemStyle = getItemStyle(item.targetDate);
+  // 根据重复类型计算实际显示的日期
+  const displayDate = getNextOccurrence(item.targetDate, item.repeatType);
+  const itemStyle = getItemStyle(displayDate);
+
+  // 重复标记
+  const repeatLabel = item.repeatType === 'weekly' ? '🔄 每周' :
+                      item.repeatType === 'yearly' ? '🔄 每年' : '';
 
   return (
     <li className="item" style={{
@@ -62,8 +68,13 @@ export default function CountdownItem({ item, onDelete }: Props) {
       <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
         <span style={{ width: 12, height: 12, borderRadius: 999, background: item.color || "#0ea5e9" }} />
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 600 }}>{item.title}</div>
-          <div className="subtle" style={{ fontSize: 12 }}>{new Date(item.targetDate).toLocaleDateString()} ・ {label(item.targetDate)}</div>
+          <div style={{ fontWeight: 600 }}>
+            {item.title}
+            {repeatLabel && <span style={{ fontSize: 12, marginLeft: 6, opacity: 0.7 }}>{repeatLabel}</span>}
+          </div>
+          <div className="subtle" style={{ fontSize: 12 }}>
+            {new Date(displayDate).toLocaleDateString()} ・ {label(displayDate)}
+          </div>
         </div>
       </div>
       <button onClick={() => onDelete(item.id)} className="btn btn-danger">删除</button>

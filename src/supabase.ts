@@ -137,6 +137,7 @@ export async function addCountdown(countdown: {
   title: string;
   targetDate: string;
   color?: string;
+  repeatType?: string;
 }) {
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -147,6 +148,7 @@ export async function addCountdown(countdown: {
       title: countdown.title,
       target_date: countdown.targetDate,
       color: countdown.color || '#0ea5e9',
+      repeat_type: countdown.repeatType || 'none',
     })
     .select()
     .single();

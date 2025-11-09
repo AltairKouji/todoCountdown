@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import type { Countdown } from "../../types";
+import type { Countdown, RepeatType } from "../../types";
 import CountdownItem from "./CountdownItem";
 import { getCountdowns, addCountdown, deleteCountdown, subscribeCountdowns } from "../../supabase";
-import { daysLeft } from "../../utils/date";
+import { daysLeft, getNextOccurrence } from "../../utils/date";
 
 export default function CountdownSection() {
   const [items, setItems] = useState<Countdown[]>([]);
@@ -10,6 +10,7 @@ export default function CountdownSection() {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [color, setColor] = useState("#0ea5e9");
+  const [repeatType, setRepeatType] = useState<RepeatType>("none");
 
   // 加载 countdowns
   const loadCountdowns = async () => {
@@ -21,6 +22,7 @@ export default function CountdownSection() {
         title: row.title,
         targetDate: row.target_date,
         color: row.color || undefined,
+        repeatType: (row.repeat_type as RepeatType) || 'none',
         createdAt: row.created_at,
       }));
       setItems(mapped);
@@ -89,8 +91,12 @@ export default function CountdownSection() {
     const future: Countdown[] = [];   // 8天+
 
     sorted.forEach((item) => {
-      const days = daysLeft(item.targetDate);
-      if (days < 0) {
+      // 根据重复类型计算实际显示的日期
+      const displayDate = getNextOccurrence(item.targetDate, item.repeatType);
+      const days = daysLeft(displayDate);
+
+      // 循环事件永远不会过期
+      if (days < 0 && (!item.repeatType || item.repeatType === 'none')) {
         expired.push(item);
       } else if (days === 0) {
         today.push(item);
@@ -114,9 +120,11 @@ export default function CountdownSection() {
         title: title.trim(),
         targetDate: new Date(date).toISOString(),
         color,
+        repeatType,
       });
       setTitle("");
       setDate("");
+      setRepeatType("none");
       // 立即刷新列表
       await loadCountdowns();
     } catch (error) {
@@ -182,14 +190,29 @@ export default function CountdownSection() {
             onChange={(e) => setDate(e.target.value)}
           />
         </div>
-        <div className="field">
-          <input
-            className="ui-input"
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            title="颜色"
-          />
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div className="field" style={{ flex: 1 }}>
+            <select
+              className="ui-input"
+              value={repeatType}
+              onChange={(e) => setRepeatType(e.target.value as RepeatType)}
+              style={{ width: '100%' }}
+            >
+              <option value="none">不重复</option>
+              <option value="weekly">每周循环</option>
+              <option value="yearly">每年循环</option>
+            </select>
+          </div>
+          <div className="field" style={{ width: 60 }}>
+            <input
+              className="ui-input"
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              title="颜色"
+              style={{ width: '100%', padding: 4 }}
+            />
+          </div>
         </div>
         <button type="submit" className="btn btn-primary">
           添加
