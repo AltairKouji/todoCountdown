@@ -2,14 +2,17 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// 根据环境自动设置 base 路径
+// Vercel: 根路径 '/'
+// GitHub Pages: 子路径 '/todoCountdown/'
+const base = process.env.GITHUB_ACTIONS ? '/todoCountdown/' : (process.env.VERCEL ? '/' : '/todoCountdown/');
+
 export default defineConfig({
-  // 根据环境自动设置 base 路径
-  // Vercel: 根路径 '/'
-  // GitHub Pages: 子路径 '/todoCountdown/'
-  base: process.env.GITHUB_ACTIONS ? '/todoCountdown/' : (process.env.VERCEL ? '/' : '/todoCountdown/'),
+  base,
   plugins: [
     react(),
     VitePWA({
+      base,  // 重要：PWA 插件需要知道 base 路径
       registerType: 'prompt',
       devOptions: { enabled: true },
       workbox: {
