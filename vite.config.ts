@@ -3,9 +3,14 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // 根据环境自动设置 base 路径
-// Vercel: 根路径 '/'
+// Cloudflare Pages / Vercel: 根路径 '/'
 // GitHub Pages: 子路径 '/todoCountdown/'
-const base = process.env.GITHUB_ACTIONS ? '/todoCountdown/' : (process.env.VERCEL ? '/' : '/todoCountdown/');
+// 本地开发: 子路径 '/todoCountdown/'
+const base = process.env.CF_PAGES || process.env.VERCEL
+  ? '/'
+  : process.env.GITHUB_ACTIONS
+    ? '/todoCountdown/'
+    : '/todoCountdown/';
 
 export default defineConfig({
   base,
