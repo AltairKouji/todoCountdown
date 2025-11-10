@@ -5,10 +5,12 @@ import type { Database } from './supabase-types';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// 调试信息：检查环境变量是否正确加载
-console.log('🔍 Supabase 配置检查:');
-console.log('  URL:', supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : '❌ 未设置');
-console.log('  Key:', supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : '❌ 未设置');
+// 调试信息：仅在开发环境检查环境变量
+if (import.meta.env.DEV) {
+  console.log('🔍 Supabase 配置检查:');
+  console.log('  URL:', supabaseUrl ? '✅ 已设置' : '❌ 未设置');
+  console.log('  Key:', supabaseAnonKey ? '✅ 已设置' : '❌ 未设置');
+}
 
 if (!supabaseUrl || !supabaseAnonKey) {
   const errorMsg = `
