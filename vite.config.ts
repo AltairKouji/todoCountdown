@@ -6,7 +6,7 @@ export default defineConfig({
   // 根据环境自动设置 base 路径
   // Vercel: 根路径 '/'
   // GitHub Pages: 子路径 '/todoCountdown/'
-  base: process.env.VERCEL ? '/' : '/todoCountdown/',
+  base: process.env.GITHUB_ACTIONS ? '/todoCountdown/' : (process.env.VERCEL ? '/' : '/todoCountdown/'),
   plugins: [
     react(),
     VitePWA({
