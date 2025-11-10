@@ -9,10 +9,13 @@ export type Todo = {
   updatedAt: string; // ISO
 };
 
+export type RepeatType = 'none' | 'weekly' | 'yearly';
+
 export type Countdown = {
   id: string;
   title: string;
   targetDate: string; // ISO (日期)
   color?: string; // e.g. "#0ea5e9"
+  repeatType?: RepeatType; // 重复类型
   createdAt: string; // ISO
 };
