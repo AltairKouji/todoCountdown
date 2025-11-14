@@ -222,3 +222,161 @@ export function subscribeCountdowns(callback: () => void) {
     supabase.removeChannel(channel);
   };
 }
+
+// =============================================
+// Activities 数据操作
+// =============================================
+
+export async function getActivities() {
+  const { data, error } = await supabase
+    .from('activities')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function addActivity(activity: {
+  name: string;
+  emoji?: string;
+  weeklyGoalMinutes: number;
+  color?: string;
+}) {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data, error } = await supabase
+    .from('activities')
+    .insert({
+      user_id: user!.id,
+      name: activity.name,
+      emoji: activity.emoji || '⏱️',
+      weekly_goal_minutes: activity.weeklyGoalMinutes,
+      color: activity.color || '#0ea5e9',
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateActivity(id: string, updates: {
+  name?: string;
+  emoji?: string;
+  weeklyGoalMinutes?: number;
+  color?: string;
+}) {
+  const payload: any = {};
+  if (updates.name !== undefined) payload.name = updates.name;
+  if (updates.emoji !== undefined) payload.emoji = updates.emoji;
+  if (updates.weeklyGoalMinutes !== undefined) payload.weekly_goal_minutes = updates.weeklyGoalMinutes;
+  if (updates.color !== undefined) payload.color = updates.color;
+
+  const { data, error } = await supabase
+    .from('activities')
+    .update(payload)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteActivity(id: string) {
+  const { error } = await supabase
+    .from('activities')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+// =============================================
+// TimeEntries 数据操作
+// =============================================
+
+export async function getTimeEntries(activityId?: string, startDate?: string, endDate?: string) {
+  let query = supabase.from('time_entries').select('*');
+
+  if (activityId) {
+    query = query.eq('activity_id', activityId);
+  }
+  if (startDate) {
+    query = query.gte('date', startDate);
+  }
+  if (endDate) {
+    query = query.lte('date', endDate);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function addTimeEntry(entry: {
+  activityId: string;
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+  date: string;
+}) {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data, error } = await supabase
+    .from('time_entries')
+    .insert({
+      user_id: user!.id,
+      activity_id: entry.activityId,
+      start_time: entry.startTime,
+      end_time: entry.endTime,
+      duration_minutes: entry.durationMinutes,
+      date: entry.date,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteTimeEntry(id: string) {
+  const { error } = await supabase
+    .from('time_entries')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+export function subscribeActivities(callback: () => void) {
+  const channel = supabase
+    .channel('activities-changes')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'activities' },
+      callback
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+export function subscribeTimeEntries(callback: () => void) {
+  const channel = supabase
+    .channel('time-entries-changes')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'time_entries' },
+      callback
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
