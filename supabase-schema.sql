@@ -115,6 +115,99 @@ CREATE TRIGGER update_todos_updated_at
   EXECUTE FUNCTION update_updated_at_column();
 
 -- =============================================
+-- 7. 创建 activities 表（时间追踪）
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.activities (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  emoji TEXT DEFAULT '⏱️',
+  weekly_goal_minutes INTEGER NOT NULL DEFAULT 180,
+  color TEXT DEFAULT '#0ea5e9',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 为 activities 创建索引
+CREATE INDEX IF NOT EXISTS idx_activities_user_id ON public.activities(user_id);
+CREATE INDEX IF NOT EXISTS idx_activities_created_at ON public.activities(created_at);
+
+-- =============================================
+-- 8. 创建 time_entries 表（时间记录）
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.time_entries (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  activity_id UUID REFERENCES public.activities(id) ON DELETE CASCADE,
+  start_time TIMESTAMPTZ NOT NULL,
+  end_time TIMESTAMPTZ NOT NULL,
+  duration_minutes INTEGER NOT NULL,
+  date DATE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 为 time_entries 创建索引
+CREATE INDEX IF NOT EXISTS idx_time_entries_user_id ON public.time_entries(user_id);
+CREATE INDEX IF NOT EXISTS idx_time_entries_activity_id ON public.time_entries(activity_id);
+CREATE INDEX IF NOT EXISTS idx_time_entries_date ON public.time_entries(date DESC);
+CREATE INDEX IF NOT EXISTS idx_time_entries_created_at ON public.time_entries(created_at DESC);
+
+-- =============================================
+-- 9. 启用 Row Level Security (RLS) - 时间追踪表
+-- =============================================
+ALTER TABLE public.activities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.time_entries ENABLE ROW LEVEL SECURITY;
+
+-- =============================================
+-- 10. 创建 RLS 策略 - Activities
+-- =============================================
+
+-- 允许用户查看自己的 activities
+CREATE POLICY "Users can view own activities"
+  ON public.activities FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- 允许用户插入自己的 activities
+CREATE POLICY "Users can insert own activities"
+  ON public.activities FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- 允许用户更新自己的 activities
+CREATE POLICY "Users can update own activities"
+  ON public.activities FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- 允许用户删除自己的 activities
+CREATE POLICY "Users can delete own activities"
+  ON public.activities FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- =============================================
+-- 11. 创建 RLS 策略 - Time Entries
+-- =============================================
+
+-- 允许用户查看自己的 time entries
+CREATE POLICY "Users can view own time_entries"
+  ON public.time_entries FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- 允许用户插入自己的 time entries
+CREATE POLICY "Users can insert own time_entries"
+  ON public.time_entries FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- 允许用户更新自己的 time entries
+CREATE POLICY "Users can update own time_entries"
+  ON public.time_entries FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- 允许用户删除自己的 time entries
+CREATE POLICY "Users can delete own time_entries"
+  ON public.time_entries FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- =============================================
 -- 完成！
 -- =============================================
 -- 请在 Supabase Dashboard -> SQL Editor 中执行此脚本

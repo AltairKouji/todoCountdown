@@ -3,11 +3,12 @@ import React, { useEffect, useState } from "react";
 import "./styles.css";
 import TodoSection from "./components/Todo/TodoSection";
 import CountdownSection from "./components/Countdown/CountdownSection";
+import TimeTrackingSection from "./components/TimeTracking/TimeTrackingSection";
 import LoginForm from "./components/Auth/LoginForm";
 import PWAUpdatePrompt from "./sw-update";
 import { supabase, getCurrentUser } from "./supabase";
 
-type TabType = 'todo' | 'countdown';
+type TabType = 'todo' | 'countdown' | 'timeTracking';
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
@@ -15,7 +16,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     // 从 localStorage 读取上次选择的 tab
     const saved = localStorage.getItem('activeTab');
-    return (saved === 'todo' || saved === 'countdown') ? saved : 'todo';
+    return (saved === 'todo' || saved === 'countdown' || saved === 'timeTracking') ? saved : 'todo';
   });
 
   // 检查登录状态
@@ -139,6 +140,23 @@ export default function App() {
           >
             ⏰ 倒数日
           </button>
+          <button
+            onClick={() => handleTabChange('timeTracking')}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              fontSize: 15,
+              fontWeight: 600,
+              border: 'none',
+              borderRadius: 10,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              backgroundColor: activeTab === 'timeTracking' ? '#0ea5e9' : '#f1f5f9',
+              color: activeTab === 'timeTracking' ? 'white' : '#64748b',
+            }}
+          >
+            ⏱️ 时间追踪
+          </button>
         </div>
 
         {/* 内容区域 - 带淡入动画 */}
@@ -161,6 +179,7 @@ export default function App() {
           </style>
           {activeTab === 'todo' && <TodoSection />}
           {activeTab === 'countdown' && <CountdownSection />}
+          {activeTab === 'timeTracking' && <TimeTrackingSection />}
         </div>
 
         <footer className="meta">
