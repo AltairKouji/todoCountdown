@@ -203,14 +203,14 @@ export default function CountdownSection() {
               <option value="yearly">每年循环</option>
             </select>
           </div>
-          <div className="field" style={{ width: 60 }}>
+          <div className="field" style={{ width: 60, height: 46, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <input
               className="ui-input"
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
               title="颜色"
-              style={{ width: '100%', padding: 4 }}
+              style={{ width: 32, height: 32, padding: 0, borderRadius: '50%', cursor: 'pointer' }}
             />
           </div>
         </div>

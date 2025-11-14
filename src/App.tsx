@@ -153,9 +153,10 @@ export default function App() {
               transition: 'all 0.2s ease',
               backgroundColor: activeTab === 'timeTracking' ? '#0ea5e9' : '#f1f5f9',
               color: activeTab === 'timeTracking' ? 'white' : '#64748b',
+              lineHeight: 1.3,
             }}
           >
-            ⏱️ 时间追踪
+            ⏱️ 时间<br/>追踪
           </button>
         </div>
 
