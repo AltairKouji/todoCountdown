@@ -173,6 +173,8 @@ export default function TimeTrackingSection() {
       setNewActivityGoal('180');
       setNewActivityColor('#0ea5e9');
       setShowAddForm(false);
+      // 立即刷新活动列表
+      await loadActivities();
     } catch (error) {
       console.error('添加活动失败:', error);
       alert('添加失败，请重试');
@@ -184,6 +186,8 @@ export default function TimeTrackingSection() {
 
     try {
       await deleteActivity(id);
+      // 立即刷新活动列表和时间记录
+      await Promise.all([loadActivities(), loadTimeEntries()]);
     } catch (error) {
       console.error('删除活动失败:', error);
       alert('删除失败，请重试');
@@ -221,6 +225,8 @@ export default function TimeTrackingSection() {
       });
 
       setTimerState(null);
+      // 立即刷新时间记录
+      await loadTimeEntries();
       alert(`计时结束！已记录 ${durationMinutes} 分钟`);
     } catch (error) {
       console.error('保存时间记录失败:', error);
@@ -251,6 +257,8 @@ export default function TimeTrackingSection() {
       });
 
       setQuickRecordMinutes('30');
+      // 立即刷新时间记录
+      await loadTimeEntries();
       alert(`已记录 ${minutes} 分钟`);
     } catch (error) {
       console.error('快速记录失败:', error);
