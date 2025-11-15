@@ -12,6 +12,7 @@ type ActivityItemProps = {
   isTimerRunning: boolean;
   onStartTimer: () => void;
   onDelete: () => void;
+  onUpdate: (id: string, updates: { name?: string; weeklyGoalMinutes?: number }) => void;
 };
 
 export default function ActivityItem({
@@ -20,7 +21,12 @@ export default function ActivityItem({
   isTimerRunning,
   onStartTimer,
   onDelete,
+  onUpdate,
 }: ActivityItemProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(activity.name);
+  const [editGoal, setEditGoal] = useState(activity.weeklyGoalMinutes.toString());
+
   const progress = Math.min(100, Math.round((weeklyMinutes / activity.weeklyGoalMinutes) * 100));
   const hoursSpent = Math.floor(weeklyMinutes / 60);
   const minutesSpent = weeklyMinutes % 60;
@@ -32,6 +38,132 @@ export default function ActivityItem({
     if (hours > 0) return `${hours}小时`;
     return `${minutes}分钟`;
   };
+
+  const handleSave = () => {
+    if (!editName.trim()) {
+      alert('活动名称不能为空');
+      return;
+    }
+    const goalMinutes = parseInt(editGoal, 10);
+    if (isNaN(goalMinutes) || goalMinutes <= 0) {
+      alert('请输入有效的目标时长');
+      return;
+    }
+    onUpdate(activity.id, {
+      name: editName.trim(),
+      weeklyGoalMinutes: goalMinutes,
+    });
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditName(activity.name);
+    setEditGoal(activity.weeklyGoalMinutes.toString());
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div
+        style={{
+          backgroundColor: 'white',
+          borderRadius: 12,
+          padding: '16px',
+          marginBottom: 12,
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        }}
+      >
+        <div style={{ marginBottom: 12 }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: 13,
+              color: '#64748b',
+              marginBottom: 6,
+            }}
+          >
+            活动名称
+          </label>
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              fontSize: 14,
+              border: '1px solid #cbd5e1',
+              borderRadius: 8,
+              outline: 'none',
+            }}
+          />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: 13,
+              color: '#64748b',
+              marginBottom: 6,
+            }}
+          >
+            周目标（分钟）
+          </label>
+          <input
+            type="number"
+            value={editGoal}
+            onChange={(e) => setEditGoal(e.target.value)}
+            min="1"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              fontSize: 14,
+              border: '1px solid #cbd5e1',
+              borderRadius: 8,
+              outline: 'none',
+            }}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={handleSave}
+            style={{
+              flex: 1,
+              padding: '10px 16px',
+              fontSize: 14,
+              fontWeight: 500,
+              border: 'none',
+              borderRadius: 8,
+              backgroundColor: '#0ea5e9',
+              color: 'white',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            保存
+          </button>
+          <button
+            onClick={handleCancel}
+            style={{
+              flex: 1,
+              padding: '10px 16px',
+              fontSize: 14,
+              fontWeight: 500,
+              border: '1px solid #cbd5e1',
+              borderRadius: 8,
+              backgroundColor: 'white',
+              color: '#64748b',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -68,27 +200,50 @@ export default function ActivityItem({
             </span>
           )}
         </div>
-        <button
-          onClick={onDelete}
-          style={{
-            padding: '4px 8px',
-            fontSize: 12,
-            border: 'none',
-            borderRadius: 6,
-            backgroundColor: '#fee2e2',
-            color: '#dc2626',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#fecaca';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#fee2e2';
-          }}
-        >
-          删除
-        </button>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <button
+            onClick={() => setIsEditing(true)}
+            style={{
+              padding: '4px 8px',
+              fontSize: 12,
+              border: 'none',
+              borderRadius: 6,
+              backgroundColor: '#f1f5f9',
+              color: '#64748b',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#e2e8f0';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f1f5f9';
+            }}
+          >
+            编辑
+          </button>
+          <button
+            onClick={onDelete}
+            style={{
+              padding: '4px 8px',
+              fontSize: 12,
+              border: 'none',
+              borderRadius: 6,
+              backgroundColor: '#fee2e2',
+              color: '#dc2626',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#fecaca';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#fee2e2';
+            }}
+          >
+            删除
+          </button>
+        </div>
       </div>
 
       <div style={{ marginBottom: 8 }}>

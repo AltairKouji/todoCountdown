@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import type { Countdown, RepeatType } from "../../types";
 import CountdownItem from "./CountdownItem";
-import { getCountdowns, addCountdown, deleteCountdown, subscribeCountdowns } from "../../supabase";
+import { getCountdowns, addCountdown, updateCountdown, deleteCountdown, subscribeCountdowns } from "../../supabase";
 import { daysLeft, getNextOccurrence } from "../../utils/date";
 
 export default function CountdownSection() {
@@ -145,6 +145,17 @@ export default function CountdownSection() {
     }
   };
 
+  const handleUpdate = async (id: string, updates: { title?: string; targetDate?: string }) => {
+    try {
+      await updateCountdown(id, updates);
+      // 立即刷新列表
+      await loadCountdowns();
+    } catch (error) {
+      console.error('更新 countdown 失败:', error);
+      alert('更新失败，请重试');
+    }
+  };
+
   // 渲染分组标题和列表的辅助函数
   const renderGroup = (title: string, items: Countdown[], emoji: string) => {
     if (items.length === 0) return null;
@@ -161,7 +172,7 @@ export default function CountdownSection() {
         </div>
         <ul className="list">
           {items.map((c) => (
-            <CountdownItem key={c.id} item={c} onDelete={remove} />
+            <CountdownItem key={c.id} item={c} onDelete={remove} onUpdate={handleUpdate} />
           ))}
         </ul>
       </div>

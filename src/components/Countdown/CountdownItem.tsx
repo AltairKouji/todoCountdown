@@ -1,9 +1,13 @@
 // File: src/components/Countdown/CountdownItem.tsx
-import React from "react";
+import React, { useState } from "react";
 import type { Countdown } from "../../types";
 import { daysLeft, getNextOccurrence } from "../../utils/date";
 
-type Props = { item: Countdown; onDelete: (id: string) => void; };
+type Props = {
+  item: Countdown;
+  onDelete: (id: string) => void;
+  onUpdate: (id: string, updates: { title?: string; targetDate?: string }) => void;
+};
 const label = (iso: string) => { const d = daysLeft(iso); if (d > 0) return `还有 ${d} 天`; if (d === 0) return "就是今天！"; return `已经过去 ${Math.abs(d)} 天`; };
 
 // 根据剩余天数获取样式
@@ -51,7 +55,11 @@ const getItemStyle = (targetDate: string) => {
   };
 };
 
-export default function CountdownItem({ item, onDelete }: Props) {
+export default function CountdownItem({ item, onDelete, onUpdate }: Props) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(item.title);
+  const [editDate, setEditDate] = useState(item.targetDate.split('T')[0]); // 只取日期部分
+
   // 根据重复类型计算实际显示的日期
   const displayDate = getNextOccurrence(item.targetDate, item.repeatType);
   const itemStyle = getItemStyle(displayDate);
@@ -59,6 +67,72 @@ export default function CountdownItem({ item, onDelete }: Props) {
   // 重复标记
   const repeatLabel = item.repeatType === 'weekly' ? '🔄 每周' :
                       item.repeatType === 'yearly' ? '🔄 每年' : '';
+
+  const handleSave = () => {
+    if (!editTitle.trim()) {
+      alert('标题不能为空');
+      return;
+    }
+    if (!editDate) {
+      alert('日期不能为空');
+      return;
+    }
+    onUpdate(item.id, {
+      title: editTitle.trim(),
+      targetDate: editDate,
+    });
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditTitle(item.title);
+    setEditDate(item.targetDate.split('T')[0]);
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <li className="item" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+        <div style={{ marginBottom: 8 }}>
+          <input
+            type="text"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            placeholder="事件标题"
+            style={{
+              width: '100%',
+              padding: '8px',
+              fontSize: 14,
+              border: '1px solid #cbd5e1',
+              borderRadius: 6,
+              marginBottom: 8,
+            }}
+          />
+          <input
+            type="date"
+            value={editDate}
+            onChange={(e) => setEditDate(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              fontSize: 14,
+              border: '1px solid #cbd5e1',
+              borderRadius: 6,
+              textAlign: 'center',
+            }}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={handleSave} className="btn btn-primary" style={{ flex: 1 }}>
+            保存
+          </button>
+          <button onClick={handleCancel} className="btn" style={{ flex: 1, background: '#e5e7eb' }}>
+            取消
+          </button>
+        </div>
+      </li>
+    );
+  }
 
   return (
     <li className="item" style={{
@@ -77,7 +151,14 @@ export default function CountdownItem({ item, onDelete }: Props) {
           </div>
         </div>
       </div>
-      <button onClick={() => onDelete(item.id)} className="btn btn-danger">删除</button>
+      <div style={{ display: 'flex', gap: 4 }}>
+        <button onClick={() => setIsEditing(true)} className="btn" style={{ fontSize: 12, padding: '6px 10px', background: '#f1f5f9' }}>
+          编辑
+        </button>
+        <button onClick={() => onDelete(item.id)} className="btn btn-danger" style={{ fontSize: 12, padding: '6px 10px' }}>
+          删除
+        </button>
+      </div>
     </li>
   );
 }

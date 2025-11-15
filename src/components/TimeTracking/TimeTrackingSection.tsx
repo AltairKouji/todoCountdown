@@ -3,6 +3,7 @@ import ActivityItem from './ActivityItem';
 import {
   getActivities,
   addActivity,
+  updateActivity,
   deleteActivity,
   getTimeEntries,
   addTimeEntry,
@@ -191,6 +192,17 @@ export default function TimeTrackingSection() {
     } catch (error) {
       console.error('删除活动失败:', error);
       alert('删除失败，请重试');
+    }
+  };
+
+  const handleUpdateActivity = async (id: string, updates: { name?: string; weeklyGoalMinutes?: number }) => {
+    try {
+      await updateActivity(id, updates);
+      // 立即刷新活动列表
+      await loadActivities();
+    } catch (error) {
+      console.error('更新活动失败:', error);
+      alert('更新失败，请重试');
     }
   };
 
@@ -389,6 +401,7 @@ export default function TimeTrackingSection() {
               isTimerRunning={timerState?.activityId === activity.id}
               onStartTimer={() => handleStartTimer(activity)}
               onDelete={() => handleDeleteActivity(activity.id)}
+              onUpdate={handleUpdateActivity}
             />
           ))}
         </div>
