@@ -52,6 +52,7 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }: Props) 
               border: '1px solid #cbd5e1',
               borderRadius: 6,
               marginBottom: 8,
+              boxSizing: 'border-box',
             }}
           />
           <input
@@ -66,6 +67,7 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }: Props) 
               border: '1px solid #cbd5e1',
               borderRadius: 6,
               marginBottom: 8,
+              boxSizing: 'border-box',
             }}
           />
           <input
@@ -79,6 +81,7 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }: Props) 
               border: '1px solid #cbd5e1',
               borderRadius: 6,
               textAlign: 'center',
+              boxSizing: 'border-box',
             }}
           />
         </div>
