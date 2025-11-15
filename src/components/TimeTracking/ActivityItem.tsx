@@ -318,32 +318,35 @@ export default function ActivityItem({
         )}
       </div>
 
-      <button
-        onClick={onStartTimer}
-        disabled={isTimerRunning}
-        style={{
-          width: '100%',
-          padding: '8px 16px',
-          fontSize: 14,
-          fontWeight: 500,
-          border: 'none',
-          borderRadius: 8,
-          backgroundColor: isTimerRunning ? '#e2e8f0' : activity.color || '#0ea5e9',
-          color: isTimerRunning ? '#94a3b8' : 'white',
-          cursor: isTimerRunning ? 'not-allowed' : 'pointer',
-          transition: 'all 0.2s',
-        }}
-        onMouseEnter={(e) => {
-          if (!isTimerRunning) {
-            e.currentTarget.style.opacity = '0.9';
-          }
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.opacity = '1';
-        }}
-      >
-        {isTimerRunning ? '计时中...' : '▶ 开始计时'}
-      </button>
+      {/* 只在本周选项卡下显示开始计时按钮 */}
+      {timePeriod === 'week' && (
+        <button
+          onClick={onStartTimer}
+          disabled={isTimerRunning}
+          style={{
+            width: '100%',
+            padding: '8px 16px',
+            fontSize: 14,
+            fontWeight: 500,
+            border: 'none',
+            borderRadius: 8,
+            backgroundColor: isTimerRunning ? '#e2e8f0' : activity.color || '#0ea5e9',
+            color: isTimerRunning ? '#94a3b8' : 'white',
+            cursor: isTimerRunning ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            if (!isTimerRunning) {
+              e.currentTarget.style.opacity = '0.9';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = '1';
+          }}
+        >
+          {isTimerRunning ? '计时中...' : '▶ 开始计时'}
+        </button>
+      )}
 
       <style>{`
         @keyframes pulse {

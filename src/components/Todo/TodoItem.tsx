@@ -77,13 +77,12 @@ export default function TodoItem({ todo, onToggle, onDelete, onUpdate }: Props) 
             style={{
               width: '100%',
               maxWidth: '100%',
-              padding: '8px 4px',
-              fontSize: 13,
+              padding: '8px',
+              fontSize: 14,
               border: '1px solid #cbd5e1',
               borderRadius: 6,
               textAlign: 'center',
               boxSizing: 'border-box',
-              overflow: 'hidden',
             }}
           />
         </div>
