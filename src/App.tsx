@@ -144,8 +144,8 @@ export default function App() {
             onClick={() => handleTabChange('timeTracking')}
             style={{
               flex: 1,
-              padding: '12px 16px',
-              fontSize: 15,
+              padding: '12px 8px',
+              fontSize: 14,
               fontWeight: 600,
               border: 'none',
               borderRadius: 10,
@@ -153,10 +153,10 @@ export default function App() {
               transition: 'all 0.2s ease',
               backgroundColor: activeTab === 'timeTracking' ? '#0ea5e9' : '#f1f5f9',
               color: activeTab === 'timeTracking' ? 'white' : '#64748b',
-              lineHeight: 1.3,
+              whiteSpace: 'nowrap',
             }}
           >
-            ⏱️ 时间<br/>追踪
+            ⏱️ 时间追踪
           </button>
         </div>
 

@@ -36,8 +36,8 @@ export const getNextOccurrence = (baseDate: string, repeatType?: RepeatType): st
 
     // 计算距离下一次目标星期几的天数
     let daysUntilNext = targetDay - today;
-    if (daysUntilNext <= 0) {
-      daysUntilNext += 7; // 如果已经过了，则下周
+    if (daysUntilNext < 0) {  // 只有当已经过了才加7天，当天(0)保持当天
+      daysUntilNext += 7;
     }
 
     const next = new Date(now);
@@ -49,8 +49,11 @@ export const getNextOccurrence = (baseDate: string, repeatType?: RepeatType): st
     // 每年循环：找到下一次相同月日的日期
     const nextYear = new Date(now.getFullYear(), base.getMonth(), base.getDate());
 
-    // 如果今年的日期已经过了，则使用明年的
-    if (nextYear <= now) {
+    // 使用日期比较而不是时间比较，只有当今年的日期已经过了才使用明年
+    const nowDayStart = toUtcDayStart(now);
+    const nextYearDayStart = toUtcDayStart(nextYear);
+
+    if (nextYearDayStart < nowDayStart) {
       nextYear.setFullYear(now.getFullYear() + 1);
     }
 
