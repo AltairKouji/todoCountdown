@@ -116,7 +116,7 @@ export default function CountdownItem({ item, onDelete, onUpdate }: Props) {
             style={{
               width: '100%',
               maxWidth: '100%',
-              padding: '8px',
+              padding: '8px 6px',
               fontSize: 14,
               border: '1px solid #cbd5e1',
               borderRadius: 6,
