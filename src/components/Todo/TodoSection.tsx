@@ -88,6 +88,17 @@ export default function TodoSection() {
     }
   };
 
+  const handleUpdate = async (id: string, updates: { title?: string; notes?: string; dueAt?: string }) => {
+    try {
+      await updateTodo(id, updates);
+      // 立即刷新列表
+      await loadTodos();
+    } catch (error) {
+      console.error('更新 todo 失败:', error);
+      alert('更新失败，请重试');
+    }
+  };
+
   const remove = async (id: string) => {
     if (confirm("确认删除这条待办？")) {
       try {
@@ -132,7 +143,7 @@ export default function TodoSection() {
 
       {hasTodos && (
         <ul className="list">
-          {sorted.map((t) => (<TodoItem key={t.id} todo={t} onToggle={toggleDone} onDelete={remove} />))}
+          {sorted.map((t) => (<TodoItem key={t.id} todo={t} onToggle={toggleDone} onDelete={remove} onUpdate={handleUpdate} />))}
         </ul>
       )}
     </section>
