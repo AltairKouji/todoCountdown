@@ -551,6 +551,7 @@ export default function TimeTrackingSection() {
               }}
               weeklyMinutes={weeklyMinutesByActivity[activity.id] || 0}
               isTimerRunning={timerState?.activityId === activity.id}
+              timePeriod={timePeriod}
               onStartTimer={() => handleStartTimer(activity)}
               onDelete={() => handleDeleteActivity(activity.id)}
               onUpdate={handleUpdateActivity}
