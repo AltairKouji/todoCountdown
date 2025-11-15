@@ -96,6 +96,7 @@ export default function ActivityItem({
               border: '1px solid #cbd5e1',
               borderRadius: 8,
               outline: 'none',
+              boxSizing: 'border-box',
             }}
           />
         </div>
@@ -122,6 +123,7 @@ export default function ActivityItem({
               border: '1px solid #cbd5e1',
               borderRadius: 8,
               outline: 'none',
+              boxSizing: 'border-box',
             }}
           />
         </div>

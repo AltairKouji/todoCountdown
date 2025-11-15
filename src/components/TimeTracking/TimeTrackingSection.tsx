@@ -37,10 +37,13 @@ type TimerState = {
   elapsedSeconds: number;
 };
 
+type TimePeriod = 'week' | 'month' | 'all';
+
 export default function TimeTrackingSection() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>('week');
 
   // 计时器状态
   const [timerState, setTimerState] = useState<TimerState | null>(() => {
@@ -86,6 +89,13 @@ export default function TimeTrackingSection() {
       unsubEntries();
     };
   }, []);
+
+  // 时间周期变化时重新加载数据
+  useEffect(() => {
+    if (!loading) {
+      loadTimeEntries();
+    }
+  }, [timePeriod]);
 
   // 计时器更新
   useEffect(() => {
@@ -140,9 +150,15 @@ export default function TimeTrackingSection() {
 
   const loadTimeEntries = async () => {
     try {
-      // 获取本周的时间记录
-      const weekStart = getWeekStart();
-      const data = await getTimeEntries(undefined, weekStart);
+      // 根据时间周期获取时间记录
+      let startDate: string | undefined;
+      if (timePeriod === 'week') {
+        startDate = getWeekStart();
+      } else if (timePeriod === 'month') {
+        startDate = getMonthStart();
+      }
+      // timePeriod === 'all' 时 startDate 为 undefined，获取所有记录
+      const data = await getTimeEntries(undefined, startDate);
       setTimeEntries(data);
     } catch (error) {
       console.error('加载时间记录失败:', error);
@@ -156,6 +172,13 @@ export default function TimeTrackingSection() {
     const monday = new Date(now.setDate(diff));
     monday.setHours(0, 0, 0, 0);
     return monday.toISOString().split('T')[0];
+  };
+
+  const getMonthStart = () => {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    firstDay.setHours(0, 0, 0, 0);
+    return firstDay.toISOString().split('T')[0];
   };
 
   const handleAddActivity = async (e: React.FormEvent) => {
@@ -367,10 +390,65 @@ export default function TimeTrackingSection() {
         </div>
       )}
 
-      {/* 本周活动统计 */}
-      <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: '#0f172a' }}>
-        📊 本周活动统计
-      </h3>
+      {/* 时间周期选择器 */}
+      <div style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: '#0f172a' }}>
+          📊 活动统计
+        </h3>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => setTimePeriod('week')}
+            style={{
+              flex: 1,
+              padding: '8px 12px',
+              fontSize: 13,
+              fontWeight: 500,
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              backgroundColor: timePeriod === 'week' ? '#0ea5e9' : '#f1f5f9',
+              color: timePeriod === 'week' ? 'white' : '#64748b',
+            }}
+          >
+            本周
+          </button>
+          <button
+            onClick={() => setTimePeriod('month')}
+            style={{
+              flex: 1,
+              padding: '8px 12px',
+              fontSize: 13,
+              fontWeight: 500,
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              backgroundColor: timePeriod === 'month' ? '#0ea5e9' : '#f1f5f9',
+              color: timePeriod === 'month' ? 'white' : '#64748b',
+            }}
+          >
+            本月
+          </button>
+          <button
+            onClick={() => setTimePeriod('all')}
+            style={{
+              flex: 1,
+              padding: '8px 12px',
+              fontSize: 13,
+              fontWeight: 500,
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              backgroundColor: timePeriod === 'all' ? '#0ea5e9' : '#f1f5f9',
+              color: timePeriod === 'all' ? 'white' : '#64748b',
+            }}
+          >
+            全部时间
+          </button>
+        </div>
+      </div>
 
       {activities.length === 0 ? (
         <div
@@ -476,6 +554,7 @@ export default function TimeTrackingSection() {
                   border: '1px solid #cbd5e1',
                   borderRadius: 8,
                   outline: 'none',
+                  boxSizing: 'border-box',
                 }}
               />
             </div>
@@ -502,6 +581,7 @@ export default function TimeTrackingSection() {
                     border: '1px solid #cbd5e1',
                     borderRadius: 8,
                     outline: 'none',
+                    boxSizing: 'border-box',
                   }}
                 />
               </div>
@@ -529,6 +609,7 @@ export default function TimeTrackingSection() {
                     border: '1px solid #cbd5e1',
                     borderRadius: 8,
                     outline: 'none',
+                    boxSizing: 'border-box',
                   }}
                 />
               </div>
@@ -643,6 +724,7 @@ export default function TimeTrackingSection() {
                   borderRadius: 8,
                   outline: 'none',
                   backgroundColor: 'white',
+                  boxSizing: 'border-box',
                 }}
               >
                 <option value="">请选择...</option>
@@ -677,6 +759,7 @@ export default function TimeTrackingSection() {
                   border: '1px solid #cbd5e1',
                   borderRadius: 8,
                   outline: 'none',
+                  boxSizing: 'border-box',
                 }}
               />
             </div>

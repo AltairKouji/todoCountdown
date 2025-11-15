@@ -106,6 +106,7 @@ export default function CountdownItem({ item, onDelete, onUpdate }: Props) {
               border: '1px solid #cbd5e1',
               borderRadius: 6,
               marginBottom: 8,
+              boxSizing: 'border-box',
             }}
           />
           <input
@@ -119,6 +120,7 @@ export default function CountdownItem({ item, onDelete, onUpdate }: Props) {
               border: '1px solid #cbd5e1',
               borderRadius: 6,
               textAlign: 'center',
+              boxSizing: 'border-box',
             }}
           />
         </div>
