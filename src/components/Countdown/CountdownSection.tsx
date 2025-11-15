@@ -3,6 +3,7 @@ import type { Countdown, RepeatType } from "../../types";
 import CountdownItem from "./CountdownItem";
 import { getCountdowns, addCountdown, updateCountdown, deleteCountdown, subscribeCountdowns } from "../../supabase";
 import { daysLeft, getNextOccurrence } from "../../utils/date";
+import { exportToJSON, formatDateForExport } from "../../utils/export";
 
 export default function CountdownSection() {
   const [items, setItems] = useState<Countdown[]>([]);
@@ -156,6 +157,33 @@ export default function CountdownSection() {
     }
   };
 
+  const handleExport = () => {
+    if (items.length === 0) {
+      alert('没有数据可导出');
+      return;
+    }
+
+    const timestamp = new Date().toISOString().split('T')[0];
+
+    // 导出为JSON
+    const jsonData = items.map(item => {
+      const displayDate = getNextOccurrence(item.targetDate, item.repeatType);
+      const days = daysLeft(displayDate);
+      const repeatTypeText = item.repeatType === 'weekly' ? '每周循环' :
+                             item.repeatType === 'yearly' ? '每年循环' : '不重复';
+
+      return {
+        标题: item.title,
+        目标日期: new Date(item.targetDate).toLocaleDateString('zh-CN'),
+        重复类型: repeatTypeText,
+        剩余天数: days >= 0 ? `${days}天` : `已过期${Math.abs(days)}天`,
+        创建时间: formatDateForExport(item.createdAt),
+      };
+    });
+
+    exportToJSON(jsonData, `倒数日_${timestamp}.json`);
+  };
+
   // 渲染分组标题和列表的辅助函数
   const renderGroup = (title: string, items: Countdown[], emoji: string) => {
     if (items.length === 0) return null;
@@ -183,7 +211,35 @@ export default function CountdownSection() {
 
   return (
     <section className="section">
-      <h2 className="h2">倒数日</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h2 className="h2" style={{ margin: 0 }}>倒数日</h2>
+        {hasAnyCountdowns && (
+          <button
+            onClick={handleExport}
+            style={{
+              padding: '6px 12px',
+              fontSize: 13,
+              fontWeight: 500,
+              border: '1px solid #cbd5e1',
+              borderRadius: 6,
+              backgroundColor: 'white',
+              color: '#64748b',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#0ea5e9';
+              e.currentTarget.style.color = '#0ea5e9';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#cbd5e1';
+              e.currentTarget.style.color = '#64748b';
+            }}
+          >
+            📥 导出
+          </button>
+        )}
+      </div>
       <form onSubmit={add} className="card">
         <div className="field">
           <input

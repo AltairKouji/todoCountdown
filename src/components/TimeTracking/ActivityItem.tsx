@@ -10,6 +10,7 @@ type ActivityItemProps = {
   };
   weeklyMinutes: number;
   isTimerRunning: boolean;
+  timePeriod: 'week' | 'month' | 'all';
   onStartTimer: () => void;
   onDelete: () => void;
   onUpdate: (id: string, updates: { name?: string; weeklyGoalMinutes?: number }) => void;
@@ -19,6 +20,7 @@ export default function ActivityItem({
   activity,
   weeklyMinutes,
   isTimerRunning,
+  timePeriod,
   onStartTimer,
   onDelete,
   onUpdate,
@@ -27,11 +29,19 @@ export default function ActivityItem({
   const [editName, setEditName] = useState(activity.name);
   const [editGoal, setEditGoal] = useState(activity.weeklyGoalMinutes.toString());
 
-  const progress = Math.min(100, Math.round((weeklyMinutes / activity.weeklyGoalMinutes) * 100));
+  // 根据时间周期计算目标值
+  const getGoalMinutes = () => {
+    if (timePeriod === 'week') return activity.weeklyGoalMinutes;
+    if (timePeriod === 'month') return activity.weeklyGoalMinutes * 4; // 一个月约4周
+    return 0; // 全部时间不显示目标
+  };
+
+  const goalMinutes = getGoalMinutes();
+  const progress = goalMinutes > 0 ? Math.min(100, Math.round((weeklyMinutes / goalMinutes) * 100)) : 0;
   const hoursSpent = Math.floor(weeklyMinutes / 60);
   const minutesSpent = weeklyMinutes % 60;
-  const hoursGoal = Math.floor(activity.weeklyGoalMinutes / 60);
-  const minutesGoal = activity.weeklyGoalMinutes % 60;
+  const hoursGoal = Math.floor(goalMinutes / 60);
+  const minutesGoal = goalMinutes % 60;
 
   const formatTime = (hours: number, minutes: number) => {
     if (hours > 0 && minutes > 0) return `${hours}小时${minutes}分钟`;
@@ -249,43 +259,63 @@ export default function ActivityItem({
       </div>
 
       <div style={{ marginBottom: 8 }}>
-        <div
-          style={{
-            fontSize: 14,
-            color: '#64748b',
-            marginBottom: 6,
-          }}
-        >
-          {formatTime(hoursSpent, minutesSpent)} / {formatTime(hoursGoal, minutesGoal)}
-        </div>
-        <div
-          style={{
-            width: '100%',
-            height: 8,
-            backgroundColor: '#f1f5f9',
-            borderRadius: 4,
-            overflow: 'hidden',
-          }}
-        >
+        {timePeriod === 'all' ? (
+          // 全部时间：只显示总时长
           <div
             style={{
-              width: `${progress}%`,
-              height: '100%',
-              backgroundColor: activity.color || '#0ea5e9',
-              transition: 'width 0.3s ease',
+              fontSize: 16,
+              fontWeight: 600,
+              color: '#0f172a',
+              marginBottom: 6,
             }}
-          />
-        </div>
-        <div
-          style={{
-            fontSize: 12,
-            color: '#94a3b8',
-            marginTop: 4,
-            textAlign: 'right',
-          }}
-        >
-          {progress}%
-        </div>
+          >
+            总计：{formatTime(hoursSpent, minutesSpent)}
+          </div>
+        ) : (
+          // 本周/本月：显示目标和进度条
+          <>
+            <div
+              style={{
+                fontSize: 14,
+                color: '#64748b',
+                marginBottom: 6,
+              }}
+            >
+              {formatTime(hoursSpent, minutesSpent)} / {formatTime(hoursGoal, minutesGoal)}
+              <span style={{ fontSize: 12, marginLeft: 6, opacity: 0.7 }}>
+                ({timePeriod === 'week' ? '本周' : '本月'}目标)
+              </span>
+            </div>
+            <div
+              style={{
+                width: '100%',
+                height: 8,
+                backgroundColor: '#f1f5f9',
+                borderRadius: 4,
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  width: `${progress}%`,
+                  height: '100%',
+                  backgroundColor: activity.color || '#0ea5e9',
+                  transition: 'width 0.3s ease',
+                }}
+              />
+            </div>
+            <div
+              style={{
+                fontSize: 12,
+                color: '#94a3b8',
+                marginTop: 4,
+                textAlign: 'right',
+              }}
+            >
+              {progress}%
+            </div>
+          </>
+        )}
       </div>
 
       <button

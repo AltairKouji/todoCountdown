@@ -115,12 +115,14 @@ export default function CountdownItem({ item, onDelete, onUpdate }: Props) {
             onChange={(e) => setEditDate(e.target.value)}
             style={{
               width: '100%',
-              padding: '8px',
-              fontSize: 14,
+              maxWidth: '100%',
+              padding: '8px 4px',
+              fontSize: 13,
               border: '1px solid #cbd5e1',
               borderRadius: 6,
               textAlign: 'center',
               boxSizing: 'border-box',
+              overflow: 'hidden',
             }}
           />
         </div>
