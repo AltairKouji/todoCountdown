@@ -3,6 +3,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import type { Todo } from "../../types";
 import TodoItem from "./TodoItem";
 import { getTodos, addTodo as addTodoToSupabase, updateTodo, deleteTodo, subscribeTodos } from "../../supabase";
+import { exportToJSON, exportToCSV, formatDateForExport } from "../../utils/export";
 
 export default function TodoSection() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -111,11 +112,59 @@ export default function TodoSection() {
     }
   };
 
+  const handleExport = () => {
+    if (todos.length === 0) {
+      alert('没有数据可导出');
+      return;
+    }
+
+    const timestamp = new Date().toISOString().split('T')[0];
+
+    // 导出为JSON
+    const jsonData = todos.map(todo => ({
+      标题: todo.title,
+      备注: todo.notes || '',
+      状态: todo.isDone ? '已完成' : '未完成',
+      到期时间: todo.dueAt ? formatDateForExport(todo.dueAt) : '',
+      创建时间: formatDateForExport(todo.createdAt),
+    }));
+
+    exportToJSON(jsonData, `待办事项_${timestamp}.json`);
+  };
+
   const hasTodos = sorted.length > 0;
 
   return (
     <section className="section">
-      <h2 className="h2">待办</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h2 className="h2" style={{ margin: 0 }}>待办</h2>
+        {hasTodos && (
+          <button
+            onClick={handleExport}
+            style={{
+              padding: '6px 12px',
+              fontSize: 13,
+              fontWeight: 500,
+              border: '1px solid #cbd5e1',
+              borderRadius: 6,
+              backgroundColor: 'white',
+              color: '#64748b',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#0ea5e9';
+              e.currentTarget.style.color = '#0ea5e9';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#cbd5e1';
+              e.currentTarget.style.color = '#64748b';
+            }}
+          >
+            📥 导出
+          </button>
+        )}
+      </div>
       <form onSubmit={addTodo} className="card">
         <div className="field">
           <input className="ui-input" placeholder="待办标题" value={title} onChange={(e) => setTitle(e.target.value)} />

@@ -10,6 +10,7 @@ import {
   subscribeActivities,
   subscribeTimeEntries,
 } from '../../supabase';
+import { exportToJSON, formatMinutes, formatDateForExport } from '../../utils/export';
 
 type Activity = {
   id: string;
@@ -322,6 +323,51 @@ export default function TimeTrackingSection() {
       .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleExport = () => {
+    if (activities.length === 0) {
+      alert('没有数据可导出');
+      return;
+    }
+
+    const timestamp = new Date().toISOString().split('T')[0];
+    const periodText = timePeriod === 'week' ? '本周' : timePeriod === 'month' ? '本月' : '全部时间';
+
+    // 导出活动统计
+    const activitiesData = activities.map(activity => {
+      const weeklyMinutes = weeklyMinutesByActivity[activity.id] || 0;
+      const progressPercent = Math.round((weeklyMinutes / activity.weekly_goal_minutes) * 100);
+
+      return {
+        活动名称: `${activity.emoji || ''} ${activity.name}`,
+        周目标: formatMinutes(activity.weekly_goal_minutes),
+        已完成: formatMinutes(weeklyMinutes),
+        完成度: `${progressPercent}%`,
+        创建时间: formatDateForExport(activity.created_at),
+      };
+    });
+
+    // 导出时间记录明细
+    const entriesData = timeEntries.map(entry => {
+      const activity = activities.find(a => a.id === entry.activity_id);
+      return {
+        活动: activity ? `${activity.emoji || ''} ${activity.name}` : '未知活动',
+        时长: formatMinutes(entry.duration_minutes),
+        日期: new Date(entry.date).toLocaleDateString('zh-CN'),
+        开始时间: new Date(entry.start_time).toLocaleString('zh-CN'),
+        结束时间: new Date(entry.end_time).toLocaleString('zh-CN'),
+      };
+    });
+
+    const exportData = {
+      导出时间: new Date().toLocaleString('zh-CN'),
+      统计周期: periodText,
+      活动统计: activitiesData,
+      时间记录明细: entriesData,
+    };
+
+    exportToJSON(exportData, `时间追踪_${periodText}_${timestamp}.json`);
+  };
+
   if (loading) {
     return (
       <div style={{ padding: 20, textAlign: 'center', color: '#64748b' }}>
@@ -392,9 +438,37 @@ export default function TimeTrackingSection() {
 
       {/* 时间周期选择器 */}
       <div style={{ marginBottom: 16 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: '#0f172a' }}>
-          📊 活动统计
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0, color: '#0f172a' }}>
+            📊 活动统计
+          </h3>
+          {activities.length > 0 && (
+            <button
+              onClick={handleExport}
+              style={{
+                padding: '4px 10px',
+                fontSize: 12,
+                fontWeight: 500,
+                border: '1px solid #cbd5e1',
+                borderRadius: 6,
+                backgroundColor: 'white',
+                color: '#64748b',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#0ea5e9';
+                e.currentTarget.style.color = '#0ea5e9';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#cbd5e1';
+                e.currentTarget.style.color = '#64748b';
+              }}
+            >
+              📥 导出
+            </button>
+          )}
+        </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             onClick={() => setTimePeriod('week')}
